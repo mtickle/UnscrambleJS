@@ -53,12 +53,16 @@
                                 <li class="list-group-item">
                                     <button type="button" id="btnSolve" class="btn btn-outline-success">Solve Puzzle</button>
                                     <button type="button" id="btnGenerate" class="btn btn-outline-primary">Get a New Word</button>
-                                    <button type="button" id="btnShuffle" class="btn btn-outline-warning">Shuffle</button>
+                                    <button type="button" id="btnShuffle" class="btn btn-outline-primary">Shuffle</button>
+                                    <button type="button" id="btnAddTime" class="btn btn-outline-primary">Add 10 seconds</button>
                                 </li>
                                 <li class="list-group-item">
+                                    Built with:
                                     <ul>
-                                        <li>Limit number of letter guesses</li>
-                                        <li>Record score with words</li>
+                                        <li><a href="http://git.wimbarelds.nl/TimeCircles/index.html">TimeCircles</a></li>
+                                        <li><a href="http://jquery.com/">jQuery</a></li>
+                                        <li><a href="https://getbootstrap.com/">Bootstrap</a></li>
+                                        <li><a href="https://code.tutsplus.com/tutorials/creating-a-keyboard-with-css-and-jquery--net-5774">jQuery Keyboard</a></li>
                                     </ul>
 
                                 </li>
@@ -73,12 +77,12 @@
                             </div>
                             <div class="card-body">
                                 <ul>
-                                    <li>Shuffles:
-                                        <span id="lblShuffleCost">0</span>
+                                    <li>Shuffles: $<span id="lblShuffleCost">0</span>
                                     </li>
-                                    <li>Extra time:
-                                        <span id="lblTimeExtendCost">0</span>
+                                    <li>Extra time: $<span id="lblTimeExtendCost">0</span>
                                     </li>
+                                    <li>Letter Locks: $<span id="lblTimeExtendCost">0</span>
+                                    </li>                                    
                                 </ul>
         
                             </div>
@@ -102,7 +106,7 @@
                                         <span id="lblAllowedGuesses">0</span>
                                     </li>
                                     <li>Shuffles remaining:
-                                        <span id="lblShufflesRemaining">5</span>
+                                        <span id="lblShufflesRemaining">0</span>
                                     </li>
                                 </ul>       
                             </div>

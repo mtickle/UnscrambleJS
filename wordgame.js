@@ -1,3 +1,4 @@
+
 $("#btnGenerate").click(function () {
 
   //--- -----------------------------------------------------------
@@ -7,7 +8,14 @@ $("#btnGenerate").click(function () {
   //--- Reset the timer.
   $("#DateCountdown").TimeCircles().stop();
   $("#DateCountdown").TimeCircles().restart();
-
+  
+  //--- Load up some shuffles
+  var shufflesRemaining = parseInt($('#lblShufflesRemaining').html());
+  shufflesRemaining = shufflesRemaining + 3;
+  $('#lblShufflesRemaining').html(shufflesRemaining);
+  $('#btnShuffle').html("Shuffle (" + shufflesRemaining + ")")
+  unLockButtons();
+  
   //--- Clear the letter board
   $("#letters").empty();
 
@@ -45,6 +53,10 @@ $("#btnGenerate").click(function () {
   //--- Start the timer.
   $("#DateCountdown").TimeCircles().start();
 
+  $("#DateCountdown").TimeCircles().addListener(function(unit, value, total) {
+    if(total == 0) lockButtons();
+  });
+
 });
 
 $("#btnShuffle").click(function () {
@@ -55,6 +67,17 @@ $("#btnShuffle").click(function () {
 
   //--- Clear out the wordboard.
   $("#letters").empty();
+
+  //--- Get the current amount of remaining shuffles
+  var shufflesRemaining = parseInt($('#lblShufflesRemaining').html());
+  shufflesRemaining = shufflesRemaining - 1;
+  $('#lblShufflesRemaining').html(shufflesRemaining);
+  $('#btnShuffle').html("Shuffle (" + shufflesRemaining + ")")
+
+  //--- Knock out the shuffle button if there are no more shuffles left.
+  if (shufflesRemaining ==0){
+    $('#btnShuffle').prop("disabled",true);
+  }
 
   //--- Get the word from the debug information
   var randomWord = $('#lblRandomWord').html();
@@ -98,7 +121,6 @@ $("#btnSolve").click(function () {
 
 });
 
-
 $("#DateCountdown").TimeCircles({
   "animation": "smooth",
   "start": false,
@@ -130,6 +152,16 @@ $("#DateCountdown").TimeCircles({
     }
   }
 });
+
+function lockButtons() {
+  $('#btnShuffle').prop("disabled",true);
+  $('#btnSolve').prop("disabled",true);
+}
+
+function unLockButtons() {
+  $('#btnShuffle').prop("disabled",false);
+  $('#btnSolve').prop("disabled",false);
+}
 
 function shuffle(a) {
   var j, x, i;
