@@ -45,6 +45,12 @@
     -webkit-border-radius: 5px;
 }
 
+#wordboard li.locked {
+    border: 1px solid #FF0000;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+}
+
 #keyboard .deaditem {
     background: #f78fb3;
     border-color: #000000;

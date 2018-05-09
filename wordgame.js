@@ -5,27 +5,8 @@ $("#btnGenerate").click(function () {
   //--- This happens when the "Get New Word" button is clicked.
   //--- -----------------------------------------------------------
 
-  //--- Reset the timer.
-  $("#DateCountdown").TimeCircles().stop();
-  $("#DateCountdown").TimeCircles().restart();
-
-  //--- Load up some shuffles. There will always be some available
-  //--- because we will give the player 3 at the beginning of the game.
-  var shufflesRemaining = parseInt($('#lblShufflesRemaining').html());
-  shufflesRemaining = shufflesRemaining + 3;
-  $('#lblShufflesRemaining').html(shufflesRemaining);
-  $('#btnShuffle').html("Shuffle (" + shufflesRemaining + ")")
-
-  //--- Load up some time extensions. The button has to be set to disabled
-  //--- because we don't want the player to hit it until we're under 
-  //--- 20 seconds on the time. The rule will be that we will never let 
-  //--- the player go over 60 seconds. We'll always give the player 2
-  //--- extensions at the beginning of the game.
-  $('#btnAddTime').prop("disabled", true);
-  var extensionsRemaining = parseInt($('#lblExtensionsRemaining').html());
-  extensionsRemaining = extensionsRemaining + 2;
-  $('#lblExtensionsRemaining').html(extensionsRemaining);
-  $('#btnAddTime').html("Add 10 Seconds (" + extensionsRemaining + ")")
+  //--- Set up the reward buttons
+  setRewardButtons();
 
   //--- Make sure the SOLVE and SHUFFLE button are active.
   unLockButtons();
@@ -153,13 +134,13 @@ $("#btnAddTime").click(function () {
   $('#btnAddTime').html("Add 10 Seconds (" + extensionsRemaining + ")")
 
   //--- Knock out the extensions button if there are no more extensions left.
-    if (extensionsRemaining == 0) {
-      $('#btnAddTime').prop("disabled", true);
+  if (extensionsRemaining == 0) {
+    $('#btnAddTime').prop("disabled", true);
   } else {
-      var elapsedTime = parseInt($("#DateCountdown").TimeCircles().getTime());
-      $("#DateCountdown").TimeCircles().addTime(10);
-      if (elapsedTime > 20) $('#btnAddTime').prop("disabled", true);
-    }
+    var elapsedTime = parseInt($("#DateCountdown").TimeCircles().getTime());
+    $("#DateCountdown").TimeCircles().addTime(10);
+    if (elapsedTime > 20) $('#btnAddTime').prop("disabled", true);
+  }
 });
 
 $("#btnLockLetter").click(function () {
@@ -167,17 +148,10 @@ $("#btnLockLetter").click(function () {
   //--- This will allow the player to lock a letter. There will 
   //--- be a limited number of locks available per level, unless 
   //--- the player wants to buy more. This will be tricky.
+  //--- This runs as a seperate function because it might 
+  //--- need to call itself.
 
-  //--- First off, get the length of the word.
-  var wordLength = parseInt($('#lblLetterCount').html());
-
-  //--- Create a random number to select a letter to lock.
-  var randomNumber = parseInt(getRandomWordNumber(wordLength));
-
-  var poo = $("#letters li").eq(randomNumber).html();
-
-
-  console.log(poo + " " + randomNumber);
+  lockLetter();
 
 });
 
@@ -212,6 +186,91 @@ $("#DateCountdown").TimeCircles({
     }
   }
 });
+
+function setRewardButtons() {
+
+  //--- Reset the timer.
+  $("#DateCountdown").TimeCircles().stop();
+  $("#DateCountdown").TimeCircles().restart();
+
+  //--- Load up some shuffles. There will always be some available
+  //--- because we will give the player 3 at the beginning of the game.
+  var shufflesRemaining = parseInt($('#lblShufflesRemaining').html());
+  shufflesRemaining = shufflesRemaining + 3;
+  $('#lblShufflesRemaining').html(shufflesRemaining);
+  $('#btnShuffle').html("Shuffle (" + shufflesRemaining + ")")
+
+  //--- Load up some time extensions. The button has to be set to disabled
+  //--- because we don't want the player to hit it until we're under 
+  //--- 20 seconds on the time. The rule will be that we will never let 
+  //--- the player go over 60 seconds. We'll always give the player 2
+  //--- extensions at the beginning of the game.
+  $('#btnAddTime').prop("disabled", true);
+  var extensionsRemaining = parseInt($('#lblExtensionsRemaining').html());
+  extensionsRemaining = extensionsRemaining + 2;
+  $('#lblExtensionsRemaining').html(extensionsRemaining);
+  $('#btnAddTime').html("Add 10 Seconds (" + extensionsRemaining + ")")
+
+  //--- Load up some shuffles. There will always be some available
+  //--- because we will give the player 3 at the beginning of the game.
+  var locksRemaining = parseInt($('#lblLocksRemaining').html());
+  locksRemaining = locksRemaining + 3;
+  $('#lblLocksRemaining').html(locksRemaining);
+  $('#btnLockLetter').html("Lock a Letter (" + locksRemaining + ")")
+  $('#btnLockLetter').prop("disabled", false);
+}
+
+function lockLetter() {
+  //--- This will allow the player to lock a letter. There will 
+  //--- be a limited number of locks available per level, unless 
+  //--- the player wants to buy more. This will be tricky.
+
+    //--- Get the current amount of remaining locks and subtract 1.
+    var locksRemaining = parseInt($('#lblLocksRemaining').html());
+
+    //--- For some weird reason, we need to check this here.
+    if (locksRemaining == 0) {
+      return false;
+    }
+
+    //--- Subtract 1 from the remaining locks
+    locksRemaining = locksRemaining - 1;
+    $('#lblLocksRemaining').html(locksRemaining);
+    $('#btnLockLetter').html("Lock a Letter (" + locksRemaining + ")")
+
+    //--- Knock out the shuffle button if there are no more shuffles left.
+    if (locksRemaining == 0) {
+      $('#btnLockLetter').prop("disabled", true);
+    }
+
+  //--- First off, get the length of the word.
+  var wordLength = parseInt($('#lblLetterCount').html());
+
+  //--- Get the word.
+  var randomWord = $('#lblRandomWord').html();
+
+  //--- Create a random number to select a letter to lock.
+  var randomNumber = parseInt(getRandomWordNumber(wordLength));
+
+  var poo = $("#letters li").eq(randomNumber).html();
+
+  //--- If the selected letter is already locked, call this
+  //--- function again to get a new letter.
+  if ($("#letters li").eq(randomNumber).hasClass("locked")) {
+    lockLetter();    
+  } else {
+    //--- Lock this letter.
+    $("#letters li").eq(randomNumber).addClass("locked");
+    //--- Add the actual letter.
+    $("#letters li").eq(randomNumber).html(randomWord.charAt(randomNumber));
+
+  }
+
+
+
+
+  console.log(poo + " " + randomNumber);
+}
 
 function lockButtons() {
   $('#btnShuffle').prop("disabled", true);
