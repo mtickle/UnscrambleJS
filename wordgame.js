@@ -1,4 +1,10 @@
 
+
+$('#btnLockLetter').prop("disabled", true);
+$('#btnShuffle').prop("disabled", true);
+$('#btnAddTime').prop("disabled", true);
+$('#btnSolve').prop("disabled", true);
+
 $("#btnGenerate").click(function () {
 
   //--- -----------------------------------------------------------
@@ -14,36 +20,11 @@ $("#btnGenerate").click(function () {
   //--- Clear the letter board.
   $("#letters").empty();
 
-  //--- Get a random number.
-  var randomNumber = getNumber();
-
   //--- Get a word based in randomNumber
-  var randomWord = getWord(randomNumber);
+  getWord();
 
-  //--- Shuffle the word.
-  var arrShuffledWord = randomWord.split('');
-  var shuffledWord = shuffle(arrShuffledWord);
-  shuffledWord = shuffledWord.join('');
-
-  //--- How long is the word?
-  var wordLength = shuffledWord.length;
-
-  //--- Display the word in the debug section.
-  $('#lblRandomWord').html(randomWord);
-
-  //--- Display the length of the word in the debug session.
-  $('#lblLetterCount').html(wordLength);
-
-  //--- Split the word into an array ...
-  var wordArray = [];
-  for (var i = 0; i < shuffledWord.length; i++) {
-    wordArray.push(shuffledWord.charAt(i));
-  }
-
-  //--- And add the letters to the wordboard.
-  for (var j = 0; j < wordArray.length; j++) {
-    $("#letters").append("<li>" + wordArray[j] + "</li>");
-  }
+  //--- Shuffle the word and add it to the wordboard.
+  shuffleWord();
 
   //--- Start the timer.
   $("#DateCountdown").TimeCircles().start();
@@ -90,38 +71,8 @@ $("#btnShuffle").click(function () {
   //--- This happens when the "Shuffle" button is clicked.
   //--- -----------------------------------------------------------
 
-  //--- Get the current amount of remaining shuffles and subtract 1.
-  var shufflesRemaining = parseInt($('#lblShufflesRemaining').html());
-  shufflesRemaining = shufflesRemaining - 1;
-  $('#lblShufflesRemaining').html(shufflesRemaining);
-  $('#btnShuffle').html("Shuffle (" + shufflesRemaining + ")")
-
-  //--- Knock out the shuffle button if there are no more shuffles left.
-  if (shufflesRemaining == 0) {
-    $('#btnShuffle').prop("disabled", true);
-  }
-
-  //--- Clear out the wordboard.
-  $("#letters").empty();
-
-  //--- Get the word from the debug information
-  var randomWord = $('#lblRandomWord').html();
-
-  //--- Shuffle the word.
-  var arrShuffledWord = randomWord.split('');
-  var shuffledWord = shuffle(arrShuffledWord);
-  shuffledWord = shuffledWord.join('');
-
-  //--- Split the word into an array
-  var wordArray = [];
-  for (var i = 0; i < shuffledWord.length; i++) {
-    wordArray.push(shuffledWord.charAt(i));
-  }
-
-  //--- add the letters to the wordboard
-  for (var j = 0; j < wordArray.length; j++) {
-    $("#letters").append("<li>" + wordArray[j] + "</li>");
-  }
+  updateShuffleCount();
+  shuffleWord();
 
 });
 
@@ -187,6 +138,56 @@ $("#DateCountdown").TimeCircles({
   }
 });
 
+function updateShuffleCount() {
+  //--- Get the current amount of remaining shuffles and subtract 1.
+  var shufflesRemaining = parseInt($('#lblShufflesRemaining').html());
+  shufflesRemaining = shufflesRemaining - 1;
+  $('#lblShufflesRemaining').html(shufflesRemaining);
+  $('#btnShuffle').html("Shuffle (" + shufflesRemaining + ")")
+
+  //--- Knock out the shuffle button if there are no more shuffles left.
+  if (shufflesRemaining == 0) {
+    $('#btnShuffle').prop("disabled", true);
+  }
+}
+
+function shuffleWord() {
+
+  //--- Get the word
+  var word = $('#lblRandomWord').html();
+
+  //--- Clear out the letter board.
+  //--- THIS IS A BAD IDEA!
+  $("#letters").empty();
+
+  //--- Shuffle the word.
+  var arrShuffledWord = word.split('');
+  var shuffledWord = shuffle(arrShuffledWord);
+  shuffledWord = shuffledWord.join('');
+
+  //--- How long is the word?
+  var wordLength = shuffledWord.length;
+
+  //--- Display the word in the debug section.
+  // $('#lblRandomWord').html(word);
+  // $('#lblWorkingRandomWord').html(word);
+
+  //--- Display the length of the word in the debug session.
+  $('#lblLetterCount').html(wordLength);
+
+  //--- Split the word into an array ...
+  var wordArray = [];
+  for (var i = 0; i < shuffledWord.length; i++) {
+    wordArray.push(shuffledWord.charAt(i));
+  }
+
+  //--- And add the letters to the wordboard.
+  for (var j = 0; j < wordArray.length; j++) {
+    $("#letters").append("<li>" + wordArray[j] + "</li>");
+  }
+
+}
+
 function setRewardButtons() {
 
   //--- Reset the timer.
@@ -220,11 +221,13 @@ function setRewardButtons() {
   $('#btnLockLetter').prop("disabled", false);
 }
 
-function lockLetter() {
+function lockLetter(redo) {
   //--- This will allow the player to lock a letter. There will 
   //--- be a limited number of locks available per level, unless 
   //--- the player wants to buy more. This will be tricky.
 
+  //--- Only run the purchase if this isn't a redo
+  if (redo != 1) {
     //--- Get the current amount of remaining locks and subtract 1.
     var locksRemaining = parseInt($('#lblLocksRemaining').html());
 
@@ -242,7 +245,7 @@ function lockLetter() {
     if (locksRemaining == 0) {
       $('#btnLockLetter').prop("disabled", true);
     }
-
+  }
   //--- First off, get the length of the word.
   var wordLength = parseInt($('#lblLetterCount').html());
 
@@ -257,19 +260,15 @@ function lockLetter() {
   //--- If the selected letter is already locked, call this
   //--- function again to get a new letter.
   if ($("#letters li").eq(randomNumber).hasClass("locked")) {
-    lockLetter();    
+    console.log("got something already locked " + randomNumber);
+    lockLetter(1);
   } else {
     //--- Lock this letter.
+    console.log("locking " + randomNumber);
     $("#letters li").eq(randomNumber).addClass("locked");
     //--- Add the actual letter.
     $("#letters li").eq(randomNumber).html(randomWord.charAt(randomNumber));
-
   }
-
-
-
-
-  console.log(poo + " " + randomNumber);
 }
 
 function lockButtons() {
@@ -307,7 +306,9 @@ function getRandomWordNumber(upperLimit) {
   return randomNumber;
 }
 
-function getWord(randomNumber) {
+function getWord() {
+  var randomNumber = getNumber();
   var word = words[randomNumber];
-  return word;
+  $('#lblRandomWord').html(word);
+  $('#lblWorkingRandomWord').html(word);
 }
