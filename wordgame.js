@@ -181,11 +181,15 @@ function shuffleWord() {
     wordArray.push(shuffledWord.charAt(i));
   }
 
-  //--- And add the letters to the wordboard.
+    //--- Add the panels to the wordboard.
   for (var j = 0; j < wordArray.length; j++) {
-    $("#letters").append("<li>" + wordArray[j] + "</li>");
+    $("#letters").append("<li> </li>");
   }
 
+  //--- Now add the letters to the LI elements.
+  $("#letters li").each(function(index) {
+    $("#letters li").eq(index).html(wordArray[index])
+  });
 }
 
 function setRewardButtons() {
@@ -255,16 +259,15 @@ function lockLetter(redo) {
   //--- Create a random number to select a letter to lock.
   var randomNumber = parseInt(getRandomWordNumber(wordLength));
 
-  var poo = $("#letters li").eq(randomNumber).html();
-
   //--- If the selected letter is already locked, call this
   //--- function again to get a new letter.
   if ($("#letters li").eq(randomNumber).hasClass("locked")) {
-    console.log("got something already locked " + randomNumber);
+    //--- Something we tried to lock was already locked. 
+    //--- Call this function again with a 1 and we'll skip
+    //--- the part where we take away a lock.
     lockLetter(1);
   } else {
     //--- Lock this letter.
-    console.log("locking " + randomNumber);
     $("#letters li").eq(randomNumber).addClass("locked");
     //--- Add the actual letter.
     $("#letters li").eq(randomNumber).html(randomWord.charAt(randomNumber));
