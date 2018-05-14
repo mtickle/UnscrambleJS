@@ -24,7 +24,7 @@ $("#btnGenerate").click(function () {
   getWord();
 
   //--- Shuffle the word and add it to the wordboard.
-  shuffleWord();
+  shuffleWord(true);
 
   //--- Start the timer.
   $("#DateCountdown").TimeCircles().start();
@@ -72,7 +72,7 @@ $("#btnShuffle").click(function () {
   //--- -----------------------------------------------------------
 
   updateShuffleCount();
-  shuffleWord();
+  shuffleWord(false);
 
 });
 
@@ -151,14 +151,14 @@ function updateShuffleCount() {
   }
 }
 
-function shuffleWord() {
+function shuffleWord(newgame) {
 
   //--- Get the word
   var word = $('#lblRandomWord').html();
 
   //--- Clear out the letter board.
   //--- THIS IS A BAD IDEA!
-  $("#letters").empty();
+  //$("#letters").empty();
 
   //--- Shuffle the word.
   var arrShuffledWord = word.split('');
@@ -181,13 +181,19 @@ function shuffleWord() {
     wordArray.push(shuffledWord.charAt(i));
   }
 
-    //--- Add the panels to the wordboard.
-  for (var j = 0; j < wordArray.length; j++) {
-    $("#letters").append("<li> </li>");
+  //--- Add the panels to the wordboard. We 
+  //--- don't ever want to destroy these elements with the
+  //--- current word.
+
+  if (newgame) {
+    for (var j = 0; j < wordArray.length; j++) {
+      $("#letters").append("<li> </li>");
+    }
+
   }
 
   //--- Now add the letters to the LI elements.
-  $("#letters li").each(function(index) {
+  $("#letters li").each(function (index) {
     $("#letters li").eq(index).html(wordArray[index])
   });
 }
