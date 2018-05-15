@@ -5,6 +5,7 @@ $('#btnShuffle').prop("disabled", true);
 $('#btnAddTime').prop("disabled", true);
 $('#btnSolve').prop("disabled", true);
 
+
 $("#btnGenerate").click(function () {
 
   //--- -----------------------------------------------------------
@@ -62,6 +63,8 @@ $("#btnSolve").click(function () {
   var coinCount = parseInt($('#lblCoinCount').html());
   coinCount = coinCount + reward;
   $('#lblCoinCount').html(coinCount);
+  $('#btnSolve').prop("disabled", true);
+
 
 });
 
@@ -153,49 +156,75 @@ function updateShuffleCount() {
 
 function shuffleWord(newgame) {
 
-  //--- Get the word
-  var word = $('#lblRandomWord').html();
+  //--- This is a universal function that handles shuffling words.
+  //--- It has two modes:
+  //--- 1: A new game, which gets the word, clears out all panels,
+  //--- shuffles the word and places it in the game.
+  //--- 2: An in-game shuffle that has to work around letters that
+  //--- might be locked.
 
-  //--- Clear out the letter board.
-  //--- THIS IS A BAD IDEA!
-  //$("#letters").empty();
-
-  //--- Shuffle the word.
-  var arrShuffledWord = word.split('');
-  var shuffledWord = shuffle(arrShuffledWord);
-  shuffledWord = shuffledWord.join('');
-
-  //--- How long is the word?
-  var wordLength = shuffledWord.length;
-
-  //--- Display the word in the debug section.
-  // $('#lblRandomWord').html(word);
-  // $('#lblWorkingRandomWord').html(word);
-
-  //--- Display the length of the word in the debug session.
-  $('#lblLetterCount').html(wordLength);
-
-  //--- Split the word into an array ...
-  var wordArray = [];
-  for (var i = 0; i < shuffledWord.length; i++) {
-    wordArray.push(shuffledWord.charAt(i));
-  }
-
-  //--- Add the panels to the wordboard. We 
-  //--- don't ever want to destroy these elements with the
-  //--- current word.
-
+  //--- Starting a new game!
   if (newgame) {
+
+    //--- Get the word
+    var word = $('#lblRandomWord').html();
+
+    //--- Shuffle the word.
+    var arrShuffledWord = word.split('');
+    var shuffledWord = shuffle(arrShuffledWord);
+    shuffledWord = shuffledWord.join('');
+   
+    //--- Split the word into an array ...
+    var wordArray = [];
+    for (var i = 0; i < shuffledWord.length; i++) {
+      wordArray.push(shuffledWord.charAt(i));
+    }
+
+    //--- Lay down the individual panels to hold the letters.
     for (var j = 0; j < wordArray.length; j++) {
       $("#letters").append("<li> </li>");
     }
 
+    //--- Add the letters to the LI elements. This happens
+    //--- whether or not we're starting a new game.
+    $("#letters li").each(function (index) {
+      $("#letters li").eq(index).html(wordArray[index])
+    });
+ 
+  } else {
+    //--- Doing an in-game shuffle.
+    //--- Get all the letters that are not in locked panels.
+    //--- Probably add them to an array that we can shuffle.
+
+    var wordArray = [];
+    var unlockedLetters = "";
+
+    $("#letters li").each(function (index) {      
+      //--- Get a reference to the current element.
+      var thisPanel = $("#letters li").eq(index);      
+      if (!thisPanel.hasClass("locked")) {        
+        //--- Get the letter from inside the panel and concatenate them.
+        unlockedLetters += thisPanel.html();        
+      }
+    });
+
+        //--- Now let's shuffle the remaining letters.
+        var arrShuffledWord = unlockedLetters.split('');
+        var shuffledWord = shuffle(arrShuffledWord);
+        shuffledWord = shuffledWord.join('');
+
+        //--- Here is where its going to get nasty. We need to 
+        //--- put the shuffled letters into the unlocked
+        //--- panels only.
+    
+
+
+    console.log(shuffledWord);
+
+    
   }
 
-  //--- Now add the letters to the LI elements.
-  $("#letters li").each(function (index) {
-    $("#letters li").eq(index).html(wordArray[index])
-  });
+
 }
 
 function setRewardButtons() {
@@ -316,8 +345,23 @@ function getRandomWordNumber(upperLimit) {
 }
 
 function getWord() {
+
+  //--- Get a random number based on the total 
+  //--- number of words available.
   var randomNumber = getNumber();
+
+  //--- Get a word from the word list based on the above 
+  //--- random number.
   var word = words[randomNumber];
+  
+  //--- Add the word to the interface. When in production,
+  //--- this should not be visible, obviously.
   $('#lblRandomWord').html(word);
-  $('#lblWorkingRandomWord').html(word);
+  
+  //--- How long is the word?
+  var wordLength = word.length;
+
+  //--- Display the length of the word in the debug section.
+  $('#lblLetterCount').html(wordLength);
+
 }
