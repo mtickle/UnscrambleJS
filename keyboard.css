@@ -24,8 +24,8 @@
     height: 40px;
     line-height: 40px;
     text-align: center;
-    background: #fff;
-    border: 1px solid #C0C0C0;
+
+    border: 1px solid #FF0000;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
 }
@@ -47,6 +47,7 @@
 
 #wordboard li.locked {
     border: 1px solid #FF0000;
+    background: #A0A0A0;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
 }

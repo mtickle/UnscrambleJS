@@ -201,7 +201,9 @@ function shuffleWord(newgame) {
 
     $("#letters li").each(function (index) {      
       //--- Get a reference to the current element.
-      var thisPanel = $("#letters li").eq(index);      
+      var thisPanel = $("#letters li").eq(index);           
+      //--- If the current panel does not have the "locked" class
+      //--- then we need to get the letter out.
       if (!thisPanel.hasClass("locked")) {        
         //--- Get the letter from inside the panel and concatenate them.
         unlockedLetters += thisPanel.html();        
@@ -213,18 +215,25 @@ function shuffleWord(newgame) {
         var shuffledWord = shuffle(arrShuffledWord);
         shuffledWord = shuffledWord.join('');
 
+        var wordArray = [];
+        for (var i = 0; i < shuffledWord.length; i++) {
+          wordArray.push(shuffledWord.charAt(i));
+        }
+
         //--- Here is where its going to get nasty. We need to 
         //--- put the shuffled letters into the unlocked
-        //--- panels only.
-    
-
-
-    console.log(shuffledWord);
-
-    
+        //--- panels only. I guess the best way is to get back 
+        //--- into a loop through the panels and hunting for unlocked
+        //--- panels.
+         $("#letters li").each(function (index) {      
+           var thisPanel = $("#letters li").eq(index);           
+           if (!thisPanel.hasClass("locked")) { 
+             console.log(index);
+        //     thisPanel.html(wordArray[index])
+           }
+         });
+    console.log(shuffledWord);  
   }
-
-
 }
 
 function setRewardButtons() {
