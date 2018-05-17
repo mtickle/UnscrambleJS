@@ -229,7 +229,7 @@ function shuffleWord(newgame) {
            var thisPanel = $("#letters li").eq(index);           
            if (!thisPanel.hasClass("locked")) { 
              console.log(index);
-        //     thisPanel.html(wordArray[index])
+             thisPanel.html(wordArray[index])
            }
          });
     console.log(shuffledWord);  
