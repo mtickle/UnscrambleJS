@@ -74,7 +74,7 @@ $("#btnShuffle").click(function () {
   //--- This happens when the "Shuffle" button is clicked.
   //--- -----------------------------------------------------------
 
-  updateShuffleCount();
+  //updateShuffleCount();
   shuffleWord(false);
 
 });
@@ -167,72 +167,80 @@ function shuffleWord(newgame) {
   if (newgame) {
 
     //--- Get the word
-    var word = $('#lblRandomWord').html();
+    var word = getWord();
 
-    //--- Shuffle the word.
+    //--- Break it into an array.
     var arrShuffledWord = word.split('');
+
+    //--- Add the answer to the page. This is really for debugging.
+    addAnswerToPage(arrShuffledWord);
+
+    //--- Shuffle the word inside the array.
+    shuffle(arrShuffledWord);
+
+    //--- Lay down the individual panels to hold the letters. These go down
+    //--- empty and we'll fill them in shortly.
+    for (var j = 0; j < arrShuffledWord.length; j++) {
+      $("#letters").append("<li> </li>");
+    }
+
+    //--- Add the letters to the LI elements.
+    $("#letters li").each(function (index) {
+      $("#letters li").eq(index).html(arrShuffledWord[index])
+    });
+
+  } else {
+
+    //--- Doing an in-game shuffle.
+    var unlockedLetters = "";
+
+    //--- We need to build a list of the unlocked letters so we know
+    //--- what needs to be shuffled.
+    $("#letters li").each(function (index) {
+
+      //--- Get a reference to the current element.
+      var thisPanel = $("#letters li").eq(index);
+
+      //--- If the current panel does not have the "locked" class
+      //--- then we need to get the letter out.
+      if (!thisPanel.hasClass("locked")) {
+        //--- Get the letter from inside the panel and concatenate them.
+        unlockedLetters += thisPanel.html();
+      }
+
+    });
+
+      c(unlockedLetters);
+    
+
+    //--- Now let's shuffle the remaining letters.
+    var arrShuffledWord = unlockedLetters.split('');
     var shuffledWord = shuffle(arrShuffledWord);
     shuffledWord = shuffledWord.join('');
-   
-    //--- Split the word into an array ...
+
+    /*
+    I think there needs to be a different approach. maybe we need to 
+    just pull the locked letters out of the string and add them back in 
+    as if it was a new word, but not messing with the locked panels.
+    */
+
+
     var wordArray = [];
     for (var i = 0; i < shuffledWord.length; i++) {
       wordArray.push(shuffledWord.charAt(i));
     }
 
-    //--- Lay down the individual panels to hold the letters.
-    for (var j = 0; j < wordArray.length; j++) {
-      $("#letters").append("<li> </li>");
-    }
-
-    //--- Add the letters to the LI elements. This happens
-    //--- whether or not we're starting a new game.
+    //--- Here is where its going to get nasty. We need to 
+    //--- put the shuffled letters into the unlocked
+    //--- panels only. I guess the best way is to get back 
+    //--- into a loop through the panels and hunting for unlocked
+    //--- panels.
     $("#letters li").each(function (index) {
-      $("#letters li").eq(index).html(wordArray[index])
-    });
- 
-  } else {
-    //--- Doing an in-game shuffle.
-    //--- Get all the letters that are not in locked panels.
-    //--- Probably add them to an array that we can shuffle.
-
-    var wordArray = [];
-    var unlockedLetters = "";
-
-    $("#letters li").each(function (index) {      
-      //--- Get a reference to the current element.
-      var thisPanel = $("#letters li").eq(index);           
-      //--- If the current panel does not have the "locked" class
-      //--- then we need to get the letter out.
-      if (!thisPanel.hasClass("locked")) {        
-        //--- Get the letter from inside the panel and concatenate them.
-        unlockedLetters += thisPanel.html();        
+      var thisPanel = $("#letters li").eq(index);
+      if (!thisPanel.hasClass("locked")) {
+        thisPanel.html(wordArray[index])
       }
     });
-
-        //--- Now let's shuffle the remaining letters.
-        var arrShuffledWord = unlockedLetters.split('');
-        var shuffledWord = shuffle(arrShuffledWord);
-        shuffledWord = shuffledWord.join('');
-
-        var wordArray = [];
-        for (var i = 0; i < shuffledWord.length; i++) {
-          wordArray.push(shuffledWord.charAt(i));
-        }
-
-        //--- Here is where its going to get nasty. We need to 
-        //--- put the shuffled letters into the unlocked
-        //--- panels only. I guess the best way is to get back 
-        //--- into a loop through the panels and hunting for unlocked
-        //--- panels.
-         $("#letters li").each(function (index) {      
-           var thisPanel = $("#letters li").eq(index);           
-           if (!thisPanel.hasClass("locked")) { 
-             console.log(index);
-             thisPanel.html(wordArray[index])
-           }
-         });
-    console.log(shuffledWord);  
   }
 }
 
@@ -244,10 +252,10 @@ function setRewardButtons() {
 
   //--- Load up some shuffles. There will always be some available
   //--- because we will give the player 3 at the beginning of the game.
-  var shufflesRemaining = parseInt($('#lblShufflesRemaining').html());
-  shufflesRemaining = shufflesRemaining + 3;
-  $('#lblShufflesRemaining').html(shufflesRemaining);
-  $('#btnShuffle').html("Shuffle (" + shufflesRemaining + ")")
+  // var shufflesRemaining = parseInt($('#lblShufflesRemaining').html());
+  // shufflesRemaining = shufflesRemaining + 3;
+  // $('#lblShufflesRemaining').html(shufflesRemaining);
+  // $('#btnShuffle').html("Shuffle (" + shufflesRemaining + ")")
 
   //--- Load up some time extensions. The button has to be set to disabled
   //--- because we don't want the player to hit it until we're under 
@@ -270,23 +278,31 @@ function setRewardButtons() {
 }
 
 function lockLetter(redo) {
+
   //--- This will allow the player to lock a letter. There will 
   //--- be a limited number of locks available per level, unless 
   //--- the player wants to buy more. This will be tricky.
+  //--- The value that comes in via redo is a flag that tells 
+  //--- us that we tried to randomly lock a letter that has already 
+  //--- been locked. So, we run this again until we get a letter
+  //--- that is unlocked.
+
+  //--- Get these values out of the interface
+  var word = $('#lblWord').html();
+  var wordLength = $('#lblWordLength').html();
+  var lockedLetterCount = parseInt($('#lblLockedLetters').html());
+  var locksRemaining = parseInt($('#lblLocksRemaining').html());
 
   //--- Only run the purchase if this isn't a redo
   if (redo != 1) {
-    //--- Get the current amount of remaining locks and subtract 1.
-    var locksRemaining = parseInt($('#lblLocksRemaining').html());
 
-    //--- For some weird reason, we need to check this here.
-    if (locksRemaining == 0) {
-      return false;
-    }
+    //--- Subtract 1 from the remaining locks and 
+    //--- increment the locked letter count.
+    locksRemaining -= 1;
+    lockedLetterCount += 1
 
-    //--- Subtract 1 from the remaining locks
-    locksRemaining = locksRemaining - 1;
     $('#lblLocksRemaining').html(locksRemaining);
+    $('#lblLockedLetters').html(lockedLetterCount);
     $('#btnLockLetter').html("Lock a Letter (" + locksRemaining + ")")
 
     //--- Knock out the shuffle button if there are no more shuffles left.
@@ -294,28 +310,36 @@ function lockLetter(redo) {
       $('#btnLockLetter').prop("disabled", true);
     }
   }
-  //--- First off, get the length of the word.
-  var wordLength = parseInt($('#lblLetterCount').html());
 
-  //--- Get the word.
-  var randomWord = $('#lblRandomWord').html();
-
-  //--- Create a random number to select a letter to lock.
+  //--- Create a random number to select a letter to lock. This is 
+  //--- based off the length of the entire word.
   var randomNumber = parseInt(getRandomWordNumber(wordLength));
 
   //--- If the selected letter is already locked, call this
   //--- function again to get a new letter.
   if ($("#letters li").eq(randomNumber).hasClass("locked")) {
-    //--- Something we tried to lock was already locked. 
-    //--- Call this function again with a 1 and we'll skip
+    //--- Something we tried to lock was already locked. Call this function again with a 1 and we'll skip
     //--- the part where we take away a lock.
     lockLetter(1);
   } else {
     //--- Lock this letter.
     $("#letters li").eq(randomNumber).addClass("locked");
-    //--- Add the actual letter.
-    $("#letters li").eq(randomNumber).html(randomWord.charAt(randomNumber));
+    //--- Add the actual letter to the locked panel.
+    $("#letters li").eq(randomNumber).html(word.charAt(randomNumber));
   }
+
+  //--- If the length of the word equals the number of locked panels, then disable the lock button.
+  if (lockedLetterCount == wordLength) {
+    //--- All the letters have been locked. No more locking and no more shuffling.
+    $('#btnLockLetter').prop("disabled", true);
+    $('#btnShuffle').prop("disabled", true);
+  }
+
+  //--- Make real sure that we have the button disabled.
+  if (locksRemaining == 0) {
+    $('#btnLockLetter').prop("disabled", true);
+  }
+
 }
 
 function lockButtons() {
@@ -326,6 +350,8 @@ function lockButtons() {
 function unLockButtons() {
   $('#btnShuffle').prop("disabled", false);
   $('#btnSolve').prop("disabled", false);
+  $('#lblLockedLetters').html(0);
+
 }
 
 function shuffle(a) {
@@ -353,7 +379,25 @@ function getRandomWordNumber(upperLimit) {
   return randomNumber;
 }
 
-function getWord() {
+function c(string){
+  console.log(string);
+}
+
+function addAnswerToPage(arrShuffledWord) {
+
+  $("#answer").empty();
+    for (var j = 0; j < arrShuffledWord.length; j++) {
+      $("#answer").append("<li> </li>");
+    }
+    $("#answer li").each(function (index) {
+      $("#answer li").eq(index).html(arrShuffledWord[index])
+    });
+
+  }
+
+
+
+  function getWord() {
 
   //--- Get a random number based on the total 
   //--- number of words available.
@@ -362,15 +406,11 @@ function getWord() {
   //--- Get a word from the word list based on the above 
   //--- random number.
   var word = words[randomNumber];
-  
-  //--- Add the word to the interface. When in production,
-  //--- this should not be visible, obviously.
-  $('#lblRandomWord').html(word);
-  
-  //--- How long is the word?
-  var wordLength = word.length;
 
-  //--- Display the length of the word in the debug section.
-  $('#lblLetterCount').html(wordLength);
+  //--- Set these values in the interface so we don't always 
+  //--- have to mess with calculating them.
+  $("#lblWord").html(word);
+  $("#lblWordLength").html(word.length);
+  return word;
 
 }
