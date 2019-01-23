@@ -115,7 +115,7 @@ $("#DateCountdown").TimeCircles({
   "bg_width": 1.2,
   "fg_width": 0.1,
   "count_past_zero": false,
-  "total_duration": 30,
+  "total_duration": 31,
   "circle_bg_color": "#60686F",
   "time": {
     "Days": {
@@ -351,6 +351,7 @@ function unLockButtons() {
   $('#btnShuffle').prop("disabled", false);
   $('#btnSolve').prop("disabled", false);
   $('#lblLockedLetters').html(0);
+  $('#btnLockLetter').prop("disabled", true);
 
 }
 
