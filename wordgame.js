@@ -5,6 +5,17 @@ $('#btnShuffle').prop("disabled", true);
 $('#btnAddTime').prop("disabled", true);
 $('#btnSolve').prop("disabled", true);
 
+$(document).ready(function(){
+  $(".close").click(function(){
+    $("#solveAlert").removeClass('show');
+  });
+  });
+
+window.setTimeout(function() {
+  $("#solveAlert").fadeTo(500, 0).slideUp(500, function(){
+      $(this).remove(); 
+  });
+}, 4000);
 
 $("#btnGenerate").click(function () {
 
@@ -19,6 +30,7 @@ $("#btnGenerate").click(function () {
   unLockButtons();
 
   //--- Clear the letter board.
+  $("#solveAlert").removeClass('show');
   $("#letters").empty();
 
   //--- Get a word based in randomNumber
@@ -58,6 +70,10 @@ $("#btnSolve").click(function () {
   //--- on the timer.
   var elapsedTime = parseInt($("#DateCountdown").TimeCircles().getTime());
   var reward = Math.round(elapsedTime);
+
+
+  $("#solveAlert").addClass('show');
+$("#solveAlert").html('Congratulations! You solved the puzzle in ' + reward + ' seconds and earned ' + reward + ' coins.');
 
   //--- Display the reward.
   var coinCount = parseInt($('#lblCoinCount').html());
@@ -368,7 +384,7 @@ function shuffle(a) {
 
 function getNumber() {
   var minNumber = 1;
-  var maxNumber = 129582;
+  var maxNumber = 5000;
   var randomNumber = Math.floor(Math.random() * (maxNumber + 1) + minNumber); // la fonction magique
   return randomNumber;
 }
