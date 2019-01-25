@@ -5,18 +5,6 @@ $('#btnShuffle').prop("disabled", true);
 $('#btnAddTime').prop("disabled", true);
 $('#btnSolve').prop("disabled", true);
 
-$(document).ready(function(){
-  $(".close").click(function(){
-    $("#solveAlert").removeClass('show');
-  });
-  });
-
-window.setTimeout(function() {
-  $("#solveAlert").fadeTo(500, 0).slideUp(500, function(){
-      $(this).remove(); 
-  });
-}, 4000);
-
 $("#btnGenerate").click(function () {
 
   //--- -----------------------------------------------------------
@@ -30,7 +18,6 @@ $("#btnGenerate").click(function () {
   unLockButtons();
 
   //--- Clear the letter board.
-  $("#solveAlert").removeClass('show');
   $("#letters").empty();
 
   //--- Get a word based in randomNumber
@@ -45,17 +32,22 @@ $("#btnGenerate").click(function () {
   // //--- Get an idea of how many time extensions are available to the player.
   // //--- I think we need to use this for the next step.
   // var extensionsRemaining = parseInt($('#lblExtensionsRemaining').html());
-  // //--- Add a listener to the timer. This will help us do a couple of things:
-  // //---    1. Stop the game when the timer runs out and run lockButtons();
-  // //---    2. Show the Add Time button if there 20 seconds or less left.
-  // $("#DateCountdown").TimeCircles().addListener(function (unit, value, total) {
-  //   //--- Time's up. Game over.    
-  //   if (total == 0) lockButtons();       
-  //   if (total < 20)  $('#btnAddTime').prop("disabled", false);
-  //   if (extensionsRemaining == 0) $('#btnAddTime').prop("disabled", true);
-  // });
+
+  //--- Add a listener to the timer. This will help us do a couple of things:
+  //---    1. Stop the game when the timer runs out and run lockButtons();
+  //---    2. Show the Add Time button if there 20 seconds or less left.
+  $("#DateCountdown").TimeCircles().addListener(function (unit, value, total) {
+    //--- Time's up. Game over.    
+    if (total == 0) showTimeAlert();     
+    if (total > 19) $('#btnAddTime').prop("disabled", true);  
+    if (total < 20) $('#btnAddTime').prop("disabled", false);  
+    //if (total < 20)  $('#btnAddTime').prop("disabled", false);
+    //if (extensionsRemaining == 0) $('#btnAddTime').prop("disabled", true);
+  });
 
 });
+
+
 
 $("#btnSolve").click(function () {
 
@@ -71,15 +63,29 @@ $("#btnSolve").click(function () {
   var elapsedTime = parseInt($("#DateCountdown").TimeCircles().getTime());
   var reward = Math.round(elapsedTime);
 
+  //--- Show the success alert.
+  $.notify({
+    message: "Congratulations!<br> You solved the puzzle in " + reward + " seconds and earned " + reward + " coins.",
+  },{
+    delay: "3000",
+    type: "success",
+    placement: {
+      from: "top",
+      align: "center"
+    },
+    animate: {
+      enter: 'animated fadeInDown',
+      exit: 'animated fadeOutUp'
+    },
+  });
 
-  $("#solveAlert").addClass('show');
-$("#solveAlert").html('Congratulations! You solved the puzzle in ' + reward + ' seconds and earned ' + reward + ' coins.');
 
   //--- Display the reward.
   var coinCount = parseInt($('#lblCoinCount').html());
   coinCount = coinCount + reward;
   $('#lblCoinCount').html(coinCount);
   $('#btnSolve').prop("disabled", true);
+  $('#btnShuffle').prop("disabled", true);
 
 
 });
@@ -97,19 +103,21 @@ $("#btnShuffle").click(function () {
 
 $("#btnAddTime").click(function () {
 
-  //--- Get the current amount of remaining extensions
+  //--- Get the current amount of remaining extensions.
   var extensionsRemaining = parseInt($('#lblExtensionsRemaining').html());
   extensionsRemaining = extensionsRemaining - 1;
   $('#lblExtensionsRemaining').html(extensionsRemaining);
   $('#btnAddTime').html("Add 10 Seconds (" + extensionsRemaining + ")")
 
   //--- Knock out the extensions button if there are no more extensions left.
+  //--- But you can't go over 30 seconds total!!!
   if (extensionsRemaining == 0) {
     $('#btnAddTime').prop("disabled", true);
-  } else {
-    var elapsedTime = parseInt($("#DateCountdown").TimeCircles().getTime());
+  } else {    
+    var elapsedTime = parseInt($("#DateCountdown").TimeCircles().getTime());    
+    //if (elapsedTime > 20) $('#btnAddTime').prop("disabled", true);
     $("#DateCountdown").TimeCircles().addTime(10);
-    if (elapsedTime > 20) $('#btnAddTime').prop("disabled", true);
+    
   }
 });
 
@@ -189,7 +197,7 @@ function shuffleWord(newgame) {
     var arrShuffledWord = word.split('');
 
     //--- Add the answer to the page. This is really for debugging.
-    addAnswerToPage(arrShuffledWord);
+    //addAnswerToPage(arrShuffledWord);
 
     //--- Shuffle the word inside the array.
     shuffle(arrShuffledWord);
@@ -225,9 +233,6 @@ function shuffleWord(newgame) {
       }
 
     });
-
-      c(unlockedLetters);
-    
 
     //--- Now let's shuffle the remaining letters.
     var arrShuffledWord = unlockedLetters.split('');
@@ -368,7 +373,8 @@ function unLockButtons() {
   $('#btnSolve').prop("disabled", false);
   $('#lblLockedLetters').html(0);
   $('#btnLockLetter').prop("disabled", true);
-
+  $('#btnAddTime').prop("disabled", true);
+  $('#btnGenerate').prop("disabled", true);
 }
 
 function shuffle(a) {
@@ -412,7 +418,25 @@ function addAnswerToPage(arrShuffledWord) {
 
   }
 
+function showTimeAlert() {
+  
+  $.notify({
+    message: "Oh no! You ran out of time!",
+  },{
+    delay: "3000",
+    type: "danger",
+    placement: {
+      from: "top",
+      align: "center"
+    },
+    animate: {
+      enter: 'animated fadeInDown',
+      exit: 'animated fadeOutUp'
+    },
+  });
 
+  lockButtons();
+}
 
   function getWord() {
 
